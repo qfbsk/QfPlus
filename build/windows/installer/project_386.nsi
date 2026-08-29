@@ -1,0 +1,291 @@
+Unicode true
+
+####
+## Please note: Template replacements don't work in this file. They are provided with default defines like
+## mentioned underneath.
+## If the keyword is not defined, "wails_tools.nsh" will populate them with the values from ProjectInfo.
+## If they are defined here, "wails_tools.nsh" will not touch them. This allows to use this project.nsi manually
+## from outside of Wails for debugging and development of the installer.
+##
+## For development first make a wails nsis build to populate the "wails_tools.nsh":
+## > wails build --target windows/amd64 --nsis
+## Then you can call makensis on this file with specifying the path to your binary:
+## For a AMD64 only installer:
+## > makensis -DARG_WAILS_AMD64_BINARY=..\..\bin\app.exe
+## For a ARM64 only installer:
+## > makensis -DARG_WAILS_ARM64_BINARY=..\..\bin\app.exe
+## For a installer with both architectures:
+## > makensis -DARG_WAILS_AMD64_BINARY=..\..\bin\app-amd64.exe -DARG_WAILS_ARM64_BINARY=..\..\bin\app-arm64.exe
+####
+## The following information is taken from the ProjectInfo file, but they can be overwritten here.
+####
+## !define INFO_PROJECTNAME    "MyProject" # Default "{{.Name}}"
+## !define INFO_COMPANYNAME    "MyCompany" # Default "{{.Info.CompanyName}}"
+## !define INFO_PRODUCTNAME    "MyProduct" # Default "{{.Info.ProductName}}"
+## !define INFO_PRODUCTVERSION "1.0.0"     # Default "{{.Info.ProductVersion}}"
+## !define INFO_COPYRIGHT      "Copyright" # Default "{{.Info.Copyright}}"
+###
+## !define PRODUCT_EXECUTABLE  "Application.exe"      # Default "${INFO_PROJECTNAME}.exe"
+## !define UNINST_KEY_NAME     "UninstKeyInRegistry"  # Default "${INFO_COMPANYNAME}${INFO_PRODUCTNAME}"
+####
+## !define REQUEST_EXECUTION_LEVEL "admin"            # Default "admin"  see also https://nsis.sourceforge.io/Docs/Chapter4.html
+####
+## Include the wails tools
+####
+!include "wails_tools.nsh"
+
+# The version information for this two must consist of 4 parts
+VIProductVersion "${INFO_PRODUCTVERSION}.0"
+VIFileVersion    "${INFO_PRODUCTVERSION}.0"
+
+VIAddVersionKey "CompanyName"     "${INFO_COMPANYNAME}"
+VIAddVersionKey "FileDescription" "${INFO_PRODUCTNAME} Installer"
+VIAddVersionKey "ProductVersion"  "${INFO_PRODUCTVERSION}"
+VIAddVersionKey "FileVersion"     "${INFO_PRODUCTVERSION}"
+VIAddVersionKey "LegalCopyright"  "${INFO_COPYRIGHT}"
+VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
+
+# Enable HiDPI support. https://nsis.sourceforge.io/Reference/ManifestDPIAware
+ManifestDPIAware true
+
+!include "MUI.nsh"
+!include "nsDialogs.nsh"
+
+!define MUI_ICON "..\icon.ico"
+!define MUI_UNICON "..\icon.ico"
+# !define MUI_WELCOMEFINISHPAGE_BITMAP "resources\leftimage.bmp" #Include this to add a bitmap on the left side of the Welcome Page. Must be a size of 164x314
+!define MUI_FINISHPAGE_NOAUTOCLOSE # Wait on the INSTFILES page so the user can take a look into the details of the installation steps
+!define MUI_ABORTWARNING # This will warn the user if they exit from the installer.
+
+Var IsUpgrade
+Var UnRemoveSdkData
+Var UnSdkDataCheckbox
+
+!insertmacro MUI_PAGE_WELCOME # Welcome to the installer page.
+# !insertmacro MUI_PAGE_LICENSE "resources\eula.txt" # Adds a EULA page to the installer
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipDirIfUpgrade
+!insertmacro MUI_PAGE_DIRECTORY # In which folder install page.
+!insertmacro MUI_PAGE_INSTFILES # Installing page.
+!insertmacro MUI_PAGE_FINISH # Finished installation page.
+
+UninstPage custom un.SdkDataOptionsPage un.SdkDataOptionsPageLeave
+!insertmacro MUI_UNPAGE_INSTFILES # Uinstalling page
+
+!insertmacro MUI_LANGUAGE "English" # Set the Language of the installer
+
+## The following two statements can be used to sign the installer and the uninstaller. The path to the binaries are provided in %1
+#!uninstfinalize 'signtool --file "%1"'
+#!finalize 'signtool --file "%1"'
+
+Name "${INFO_PRODUCTNAME}"
+OutFile "..\..\bin\${INFO_PROJECTNAME}-386-installer.exe" # Name of the installer's file.
+InstallDir "$PROGRAMFILES\${INFO_PRODUCTNAME}" # Default installing folder ($PROGRAMFILES is Program Files folder).
+ShowInstDetails show # This will always show the installation details.
+
+Function SkipDirIfUpgrade
+    ${If} $IsUpgrade == "1"
+        Abort ; Skip directory page
+    ${EndIf}
+FunctionEnd
+
+!define LEGACY_PRODUCT_EXECUTABLE "vfoxG.exe"
+!define LEGACY_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\vfoxGvfoxG"
+!define LEGACY_INSTALL_DIR "$PROGRAMFILES\vfoxG"
+
+!macro DefineKillAppImage NAME
+Function ${NAME}KillAppImage
+    ; $R4 carries the image name to close
+    nsExec::ExecToStack '"$SYSDIR\tasklist.exe" /FI "IMAGENAME eq $R4" /NH'
+    Pop $R9
+    Pop $R8
+    StrLen $R7 "$R4"
+    StrCpy $R6 $R8 $R7
+    ${If} $R6 == "$R4"
+        DetailPrint "Closing running $R4..."
+        nsExec::Exec '"$SYSDIR\taskkill.exe" /IM "$R4" /T /F'
+        Pop $R9
+        Sleep 1000
+    ${EndIf}
+FunctionEnd
+
+Function ${NAME}CloseAppImages
+    ; QfPlus and vfoxG share one data root and one set of mihomo ports, so a
+    ; running copy of either would fight the installation in progress.
+    StrCpy $R4 "${PRODUCT_EXECUTABLE}"
+    Call ${NAME}KillAppImage
+    StrCpy $R4 "${LEGACY_PRODUCT_EXECUTABLE}"
+    Call ${NAME}KillAppImage
+FunctionEnd
+!macroend
+
+!insertmacro DefineKillAppImage ""
+!insertmacro DefineKillAppImage "un."
+
+Function FindLegacyInstall
+    ; $R5 = bare path of an existing vfoxG uninstaller, or empty.
+    StrCpy $R5 ""
+    SetRegView 64
+    ReadRegStr $R0 HKLM "${LEGACY_UNINST_KEY}" "UninstallString"
+    ${If} $R5 == ""
+        StrCpy $R5 $R0
+    ${EndIf}
+    ReadRegStr $R0 HKCU "${LEGACY_UNINST_KEY}" "UninstallString"
+    ${If} $R5 == ""
+        StrCpy $R5 $R0
+    ${EndIf}
+    SetRegView 32
+    ReadRegStr $R0 HKLM "${LEGACY_UNINST_KEY}" "UninstallString"
+    ${If} $R5 == ""
+        StrCpy $R5 $R0
+    ${EndIf}
+    ReadRegStr $R0 HKCU "${LEGACY_UNINST_KEY}" "UninstallString"
+    ${If} $R5 == ""
+        StrCpy $R5 $R0
+    ${EndIf}
+    SetRegView 64
+    ${If} $R5 == ""
+    ${AndIf} ${FileExists} "${LEGACY_INSTALL_DIR}\uninstall.exe"
+        StrCpy $R5 "${LEGACY_INSTALL_DIR}\uninstall.exe"
+    ${EndIf}
+    ; ARP stores the path quoted, which would break the /S _?= invocation.
+    StrCpy $R2 $R5 1
+    ${If} $R2 == '"'
+        StrCpy $R5 $R5 "" 1
+        StrCpy $R5 $R5 -1
+    ${EndIf}
+FunctionEnd
+
+Function RemoveLegacyResidue
+    DeleteRegKey HKLM "${LEGACY_UNINST_KEY}"
+    DeleteRegKey HKCU "${LEGACY_UNINST_KEY}"
+    SetRegView 32
+    DeleteRegKey HKLM "${LEGACY_UNINST_KEY}"
+    DeleteRegKey HKCU "${LEGACY_UNINST_KEY}"
+    SetRegView 64
+    RMDir /r "${LEGACY_INSTALL_DIR}"
+FunctionEnd
+
+Function .onInit
+    # Architecture check bypassed for 386 installer
+
+    StrCpy $IsUpgrade "0"
+
+    ; Detect existing installation
+    SetRegView 64
+    ReadRegStr $0 HKLM "${UNINST_KEY}" "UninstallString"
+    ReadRegStr $1 HKLM "${UNINST_KEY}" "DisplayVersion"
+    ${If} $0 != ""
+        ; Derive install dir from UninstallString (strip quotes and filename)
+        StrCpy $R0 $0
+        StrCpy $R1 $R0 1 ; first char
+        ${If} $R1 == '"'
+            StrCpy $R0 $R0 "" 1 ; remove leading quote
+            StrCpy $R0 $R0 -1   ; remove trailing quote
+        ${EndIf}
+        ${GetParent} $R0 $INSTDIR
+
+        ${If} $1 == "${INFO_PRODUCTVERSION}"
+            MessageBox MB_YESNO|MB_ICONQUESTION "$(^Name) v${INFO_PRODUCTVERSION} is already installed.$\n$\nDo you want to reinstall?" IDYES doReinstall
+            Abort
+        ${Else}
+            MessageBox MB_YESNO|MB_ICONQUESTION "$(^Name) v$1 is already installed.$\n$\nDo you want to upgrade to v${INFO_PRODUCTVERSION}?" IDYES doUpgrade
+            Abort
+            doUpgrade:
+                Call CloseAppImages
+                ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
+        ${EndIf}
+        doReinstall:
+        StrCpy $IsUpgrade "1"
+    ${EndIf}
+
+    ; vfoxG was renamed into QfPlus; its settings migrate on first launch.
+    Call FindLegacyInstall
+    ${If} $R5 != ""
+        MessageBox MB_YESNO|MB_ICONINFORMATION "QfPlus replaces vfoxG.$\n$\nYour vfoxG settings are carried over automatically, and vfoxG will be removed.$\n$\nRemove vfoxG now?" IDNO skipLegacyRemoval
+            Call CloseAppImages
+            StrCpy $R2 $R5
+            ${GetParent} $R2 $R3
+            ExecWait '"$R5" /S _?=$R3'
+            Call RemoveLegacyResidue
+        skipLegacyRemoval:
+    ${EndIf}
+FunctionEnd
+
+Section
+    Call CloseAppImages
+
+    SetOverwrite on
+
+    !insertmacro wails.setShellContext
+
+    !insertmacro wails.webview2runtime
+
+    SetOutPath $INSTDIR
+
+    File "/oname=${PRODUCT_EXECUTABLE}" "..\..\bin\QfPlus.exe"
+
+    ; Include the core directory (contains vfox.exe) - only the matching architecture
+    SetOutPath "$INSTDIR\core\windows\x86"
+    File /r "..\..\..\core\windows\x86\*.*"
+    
+    ; Reset the out path
+    SetOutPath $INSTDIR
+
+    CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
+
+    !insertmacro wails.associateFiles
+    !insertmacro wails.associateCustomProtocols
+
+    !insertmacro wails.writeUninstaller
+SectionEnd
+
+Section "uninstall"
+    !insertmacro wails.setShellContext
+
+    Call un.CloseAppImages
+
+    InitPluginsDir
+    SetOutPath "$PLUGINSDIR"
+    File "cleanup_qfplus.ps1"
+    StrCpy $0 ""
+    StrCmp $UnRemoveSdkData 1 0 +2
+        StrCpy $0 "-RemoveSdkData"
+    nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\cleanup_qfplus.ps1" -InstallDir "$INSTDIR" -ProductName "${INFO_PRODUCTNAME}" -ProductExecutable "${PRODUCT_EXECUTABLE}" -LegacyProductNames "vfoxG" $0'
+    Pop $1
+
+    RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
+
+    RMDir /r "$INSTDIR"
+
+    Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
+    Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
+
+    !insertmacro wails.unassociateFiles
+    !insertmacro wails.unassociateCustomProtocols
+
+    !insertmacro wails.deleteUninstaller
+    RMDir "$INSTDIR"
+SectionEnd
+
+Function un.SdkDataOptionsPage
+    IfSilent 0 +2
+        Abort
+    !insertmacro MUI_HEADER_TEXT "Remove downloaded SDK data?" "Environment variables are always removed. You can choose whether to delete downloaded SDKs."
+    nsDialogs::Create 1018
+    Pop $0
+    StrCmp $0 error 0 +2
+        Abort
+
+    ${NSD_CreateLabel} 0 0 100% 34u "Uninstall will remove QfPlus, shortcuts, PATH entries, VFOX_HOME, and QfPlus SDK PATH overrides."
+    Pop $0
+    ${NSD_CreateCheckbox} 0 46u 100% 24u "Also delete downloaded SDKs, plugins, cache, and QfPlus SDK metadata"
+    Pop $UnSdkDataCheckbox
+    ${NSD_Uncheck} $UnSdkDataCheckbox
+
+    nsDialogs::Show
+FunctionEnd
+
+Function un.SdkDataOptionsPageLeave
+    ${NSD_GetState} $UnSdkDataCheckbox $UnRemoveSdkData
+FunctionEnd

@@ -1,0 +1,125 @@
+/* === Nav transitions === */
+.slide-up-enter-active,
+.slide-up-leave-active,
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 13, 13, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  color: var(--ink);
+}
+
+.modal-title {
+  margin: 0 0 12px;
+  font-size: var(--md-typescale-title-large);
+  line-height: var(--md-typescale-title-large-line-height);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.modal-message {
+  margin: 0 0 24px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  font-size: var(--md-typescale-body-medium);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 160ms ease;
+}
+
+.modal-enter-active .modal-content,
+.modal-leave-active .modal-content {
+  transition: transform 160ms ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-content,
+.modal-leave-to .modal-content {
+  transform: scale(0.97);
+}
+
+/* === Tooltip === */
+.custom-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-tooltip-content {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--on-ink);
+  padding: 8px 10px;
+  border-radius: var(--md-shape-small);
+  font-size: var(--md-typescale-body-small);
+  line-height: 1.5;
+  width: max-content;
+  max-width: 260px;
+  text-align: left;
+  transition: opacity 120ms ease, visibility 120ms;
+  z-index: 100;
+  margin-top: 6px;
+  pointer-events: none;
+  white-space: normal;
+  font-weight: 400;
+}
+
+.custom-tooltip-container:hover .custom-tooltip-content {
+  visibility: visible;
+  opacity: 1;
+}

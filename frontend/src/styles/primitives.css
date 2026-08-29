@@ -1,0 +1,326 @@
+/* === Section headings === */
+.section-heading {
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-label-large);
+  line-height: var(--md-typescale-label-large-line-height);
+  font-weight: 600;
+  color: var(--ink-3);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.section-heading:first-of-type {
+  margin-top: 0;
+}
+
+.plugin-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* === System SDK card (read-only) === */
+.card-system {
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+}
+
+.card-system h3 {
+  color: var(--ink-2);
+}
+
+.card-system .card-header {
+  cursor: default;
+  padding-right: 20px;
+}
+
+.card-system .version-label {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* === Main content column === */
+.main-shell {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.main-content {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: 32px 24px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.main-content h2 {
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-display-large);
+  line-height: var(--md-typescale-display-line-height);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+  margin-bottom: 24px;
+}
+
+/* === Grid & cards === */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.sdk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card, var(--md-shape-medium));
+  transition: background-color var(--t), border-color var(--t);
+}
+
+.card:hover {
+  border-color: var(--border);
+  background: var(--bg-side);
+}
+
+.card-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+
+.card-header h3 {
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-title-medium);
+  line-height: var(--md-typescale-title-medium-line-height);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.card-body {
+  padding: 0 16px 16px;
+  flex: 1;
+}
+
+/* === Buttons
+   Filled = solid ink; everything else stays on the white/grey ramp. === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  font-weight: 500;
+  line-height: 38px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--t), color var(--t), border-color var(--t);
+}
+
+.btn.primary,
+.btn.filled {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.btn.primary:hover,
+.btn.filled:hover {
+  background: #2F2F2F;
+}
+
+.btn.primary:active,
+.btn.filled:active {
+  background: var(--ink-2);
+}
+
+.btn.tonal {
+  background: var(--bubble);
+  color: var(--ink);
+}
+
+.btn.tonal:hover {
+  background: var(--hover);
+}
+
+.btn.tonal:active {
+  background: var(--active);
+}
+
+.btn.outlined {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+
+.btn.outlined:hover {
+  background: var(--hover);
+  border-color: var(--border-strong);
+}
+
+.btn.outlined:active {
+  background: var(--active);
+}
+
+.btn.outlined.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn.outlined.danger:hover {
+  background: var(--md-error-container);
+}
+
+.btn.text {
+  background: transparent;
+  color: var(--ink);
+  padding: 0 12px;
+}
+
+.btn.text:hover {
+  background: var(--hover);
+}
+
+.btn.text:active {
+  background: var(--active);
+}
+
+.btn.small {
+  height: 32px;
+  line-height: 30px;
+  min-width: 76px;
+  padding: 0 14px;
+  font-size: var(--md-typescale-label-medium);
+}
+
+.btn:disabled {
+  cursor: default;
+  background: var(--bubble);
+  color: var(--ink-3);
+  border-color: transparent;
+}
+
+.btn.tonal:disabled,
+.btn.outlined:disabled,
+.btn.text:disabled {
+  background: var(--bubble);
+  color: var(--ink-3);
+  border-color: transparent;
+}
+
+.btn.primary:disabled,
+.btn.filled:disabled {
+  background: var(--active);
+  color: var(--on-ink);
+  opacity: 0.6;
+}
+
+/* === Badge === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--md-shape-full);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-label-small);
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+.badge.installed {
+  background: var(--active);
+  color: var(--ink);
+}
+
+/* === Chip === */
+.chip {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  margin-bottom: 8px;
+  background: var(--bubble);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  font-weight: 400;
+  line-height: 32px;
+}
+
+/* === Link === */
+.link {
+  color: var(--link);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* === Empty state === */
+.empty-state {
+  color: var(--ink-3);
+  font-size: var(--md-typescale-body-medium);
+  line-height: var(--md-typescale-body-medium-line-height);
+  padding: 12px 0;
+}
+
+/* === Spinner === */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  border-top-color: var(--ink);
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* === Utility === */
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-align-center { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-gap-8 { gap: 8px; }
+.flex-gap-12 { gap: 12px; }

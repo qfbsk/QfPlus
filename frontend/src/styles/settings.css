@@ -1,0 +1,108 @@
+/* === Settings page: path / subscription input rows ===
+   Group headings, rows, segmented control and switch live in components.css. */
+
+.settings-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.label-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.path-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.path-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 16px;
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+
+.path-input::placeholder {
+  color: var(--ink-3);
+}
+
+.path-input:hover:not(:disabled) {
+  border-color: var(--ink-3);
+}
+
+.path-input:focus {
+  border-color: var(--ink);
+  box-shadow: var(--focus-ring);
+}
+
+.path-input:disabled {
+  color: var(--ink-3);
+  background: var(--bubble);
+}
+
+.path-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color var(--t), border-color var(--t);
+}
+
+.path-icon-btn:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: var(--border-strong);
+}
+
+.path-icon-btn:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}
+
+.path-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--bg-side);
+  border: 1px solid var(--hairline);
+  border-radius: var(--md-shape-small);
+}
+
+.path-meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--md-typescale-body-small);
+  line-height: var(--md-typescale-body-small-line-height);
+  color: var(--ink-3);
+}
+
+.path-meta-row code {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: transparent;
+}

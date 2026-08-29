@@ -1,0 +1,19 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "QfPlus",
+  "outputfilename": "QfPlus",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "清枫不识客"
+  },
+  "info": {
+    "productName": "QfPlus",
+    "companyName": "QfPlus",
+    "productVersion": "1.0.0",
+    "copyright": "清枫不识客",
+    "comments": "Cross-platform SDK version manager GUI built on the vfox engine"
+  }
+}

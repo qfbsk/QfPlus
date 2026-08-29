@@ -1,0 +1,314 @@
+/* === First-launch onboarding ===
+   Entrance animation budget: transform and opacity only, each rule runs once
+   (`both` fill, no infinite), and the whole layer is removed with v-if. */
+
+.ob-root {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: flex;
+  background: var(--bg);
+  contain: layout paint;
+  animation: ob-veil 240ms ease-out both;
+}
+
+@keyframes ob-veil {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ob-root.is-leaving {
+  animation: ob-leave 260ms ease-in both;
+  pointer-events: none;
+}
+
+@keyframes ob-leave {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.01); }
+}
+
+/* Promote only while the sequence is actually running; the class is dropped
+   by the last timer in useOnboarding so no layer hint survives into the
+   running app. */
+.ob-root.is-animating .ob-rise,
+.ob-root.is-animating .ob-mark,
+.ob-root.is-animating .ob-rule {
+  will-change: transform, opacity;
+}
+
+.ob-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--content-max);
+  height: 100%;
+  margin: 0 auto;
+  padding: 56px 40px 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* --- Header: mark, hairline rule, readiness line --- */
+.ob-head {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.ob-mark {
+  display: block;
+  width: 46px;
+  height: 46px;
+  animation: ob-mark-in 520ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.ob-mark svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes ob-mark-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ob-rule {
+  width: 132px;
+  height: 1px;
+  background: var(--border-strong);
+  transform-origin: left center;
+  animation: ob-rule-in 900ms cubic-bezier(.2, .8, .2, 1) 60ms both;
+}
+
+@keyframes ob-rule-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.ob-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 20px;
+  color: var(--ink-3);
+  font-size: var(--md-typescale-body-small);
+  line-height: var(--md-typescale-body-small-line-height);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.ob-loading.is-done {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.ob-spinner {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+}
+
+/* --- Body --- */
+.ob-body {
+  flex: 1 1 auto;
+}
+
+@keyframes ob-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ob-rise {
+  animation: ob-rise 420ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.ob-intro {
+  margin: 0 0 34px;
+  animation-delay: 0ms;
+}
+
+.ob-kicker {
+  margin: 0 0 10px;
+  color: var(--ink-3);
+  font-size: var(--md-typescale-label-large);
+  letter-spacing: 0.02em;
+}
+
+.ob-title {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-size: var(--md-typescale-display-large);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.ob-what {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--ink-2);
+  font-size: var(--md-typescale-body-medium);
+  line-height: 1.7;
+}
+
+.ob-block {
+  margin: 0 0 26px;
+}
+
+.ob-credits .ob-block:nth-child(1) { animation-delay: 90ms; }
+.ob-credits .ob-block:nth-child(2) { animation-delay: 150ms; }
+.ob-credits .ob-block:nth-child(3) { animation-delay: 210ms; }
+.ob-footer.ob-rise { animation-delay: 330ms; }
+
+.ob-label {
+  margin: 0 0 10px;
+  color: var(--ink-3);
+  font-size: var(--md-typescale-label-large);
+  font-weight: 600;
+}
+
+.ob-author {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--md-typescale-headline-medium);
+  font-weight: 600;
+  line-height: var(--md-typescale-headline-medium-line-height);
+}
+
+.ob-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ob-lines li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--ink);
+  font-size: var(--md-typescale-body-medium);
+  line-height: 1.7;
+}
+
+.ob-lines li::before {
+  content: "\25CF";
+  position: absolute;
+  left: 0;
+  color: var(--ink-3);
+  font-size: 8px;
+  line-height: 2.4;
+}
+
+.ob-group {
+  margin-top: 14px;
+}
+
+.ob-group-label {
+  margin: 0 0 8px;
+  color: var(--ink-3);
+  font-size: var(--md-typescale-label-medium);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ob-note {
+  margin: 0 0 14px;
+  color: var(--ink-2);
+  font-size: var(--md-typescale-body-medium);
+  line-height: 1.7;
+}
+
+.ob-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 14px;
+}
+
+.ob-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--link);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ob-link:hover {
+  text-decoration: underline;
+}
+
+.ob-link .material-symbols-outlined {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+/* --- Footer: language switch and the way in --- */
+.ob-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+
+.ob-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-enter .material-symbols-outlined {
+  font-size: 18px;
+}
+
+@media (max-width: 700px) {
+  .ob-sheet {
+    padding: 36px 22px 22px;
+  }
+
+  .ob-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ob-enter {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-root,
+  .ob-root.is-leaving,
+  .ob-mark,
+  .ob-rule,
+  .ob-rise {
+    animation: none;
+  }
+
+  .ob-loading {
+    transition: none;
+  }
+
+  .ob-spinner {
+    display: none;
+  }
+}

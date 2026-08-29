@@ -1,0 +1,161 @@
+# Architecture
+
+[中文](ARCHITECTURE.zh-CN.md)
+
+QfPlus is a Wails desktop application. The frontend is Vue 3 and TypeScript. The backend is Go. The backend delegates version management to the vfox CLI core and wraps it with GUI-oriented state, validation, migration, and platform integration.
+
+## Runtime Layers
+
+```text
+Vue components
+  -> composables
+    -> frontend services
+      -> Wails generated bindings
+        -> internal/app Wails facade
+          -> SDK/plugin/sync/config workflows
+            -> internal/model, internal/parser, storage, path, platform, vfox command helpers
+              -> vfox CLI core and operating system
+```
+
+Each layer has a narrow responsibility:
+
+| Layer | Responsibility |
+| --- | --- |
+| Components | Render UI, receive props, emit user actions. |
+| Composables | Own Vue state, loading flags, task orchestration, and user workflow state. |
+| Services | Wrap generated Wails bindings and normalize frontend API calls. |
+| App facade | Expose stable Wails methods and delegate to focused backend functions. |
+| Use cases | Implement SDK, plugin, environment, migration, config, and PATH workflows. |
+| Parsers | Convert vfox command output into typed data without side effects. |
+| Platform adapters | Isolate Windows and Unix behavior. |
+
+## Backend Shape
+
+The repository root keeps only the Wails startup entrypoint in `main.go`. Backend code lives under `internal/`:
+
+```text
+internal/
+  app/                           Wails facade and stateful backend workflows
+  model/                         DTOs shared with generated frontend bindings
+  parser/                        Pure vfox command-output parsers
+  pathutil/                      Shared path comparison and PATH cleanup helpers
+  storage/                       Shared JSON file persistence helpers
+```
+
+`internal/app` owns the `App` type because Wails binds exported methods on that type. Pure data and pure parsing are split out so the application package is not a dumping ground for every backend concern.
+
+### Facade Files
+
+`internal/app/app_facade_*.go` files are the public API surface used by the frontend:
+
+| File | Public area |
+| --- | --- |
+| `internal/app/app_facade_sdk.go` | SDK list, detail, version install/use/unuse, custom SDK operations. |
+| `internal/app/app_facade_plugin.go` | Plugin marketplace, added plugins, plugin removal. |
+| `internal/app/app_facade_path.go` | PATH integration, override checks, hijack/restore operations. |
+| `internal/app/app_facade_settings.go` | Download path, migration choices, platform information. |
+| `internal/app/app_facade_environment.go` | SDK environment status, export, preview, and import. |
+| `internal/app/app_facade_system.go` | Cached and active system SDK scanning. |
+| `internal/app/app_facade_vfox.go` | Raw vfox command and progress command bridge. |
+
+Facade functions should stay thin: validate input, acquire task locks when needed, call the focused implementation, and emit required events.
+
+### Domain and Workflow Files
+
+| Pattern | Responsibility |
+| --- | --- |
+| `internal/model/*.go` | DTOs and model structs shared with Wails bindings. |
+| `internal/parser/*.go` | Pure parsers for installed SDKs, details, current version, search output, and version normalization. |
+| `internal/app/config_*.go` | App config, download path, VFOX_HOME. |
+| `internal/app/vfox_*.go` | vfox executable lookup, command execution, clean environment, progress output, task lock. |
+| `internal/app/sdk_*.go` | SDK inventory, detail, install, uninstall, use, runtime root, and custom SDK registry/use/detect. |
+| `internal/app/plugin_*.go` | Marketplace loading, added plugin state, plugin add/remove, description cache. |
+| `internal/app/system_*.go` | System SDK definitions, scan orchestration, version probing, cache. |
+| `internal/app/path_*.go` | App-specific managed path root and override helpers. |
+| `internal/app/migration_*.go` | Download directory migration, no-overwrite copy, progress, repair. |
+| `internal/app/environment_*.go` | SDK environment status and diagnostic console. |
+| `internal/app/windows_*.go` | Windows PATH, shims, junctions, elevation helpers, override metadata. |
+| `internal/app/unix_*.go` | Unix PATH profile blocks, symlinks, executable checks, override behavior. |
+| `internal/pathutil/*.go` | Shared path comparison and PATH cleanup helpers. |
+| `internal/storage/*.go` | Shared JSON file persistence helpers. |
+
+## Frontend Shape
+
+```text
+frontend/src/
+  App.vue
+  app/
+    navigation.ts
+  components/
+    app/
+    common/
+    plugin/
+    sdk/
+    settings/
+    environment/
+  composables/
+  services/
+  i18n/
+  styles/
+```
+
+### Component Groups
+
+| Directory | Responsibility |
+| --- | --- |
+| `components/app` | Shell-level UI such as sidebar, task toast, terminal dock, and migration overlay. |
+| `components/common` | Shared UI such as confirmation modals. |
+| `components/sdk` | SDK manager page, detail views, version cards, removal modals, and SDK list views. |
+| `components/plugin` | Plugin marketplace page, plugin list/detail views, and plugin icons. |
+| `components/settings` | Appearance settings, download path settings, and migration plan preview. |
+| `components/environment` | SDK environment status and diagnostic console view. |
+
+### State and API Direction
+
+The frontend dependency direction is:
+
+```text
+components -> composables -> services -> frontend/wailsjs
+```
+
+Components must not import `frontend/wailsjs` directly. Services own generated Wails imports. Composables own state and workflows. Components render the state and emit user intent.
+
+## Events and Long-Running Tasks
+
+Long-running vfox commands use progress events. Backend progress handling lives in `vfox_progress.go`; frontend terminal and toast state is handled by composables such as `useTaskTerminal.ts`, `useTaskToast.ts`, and related task helpers.
+
+Migration progress uses a dedicated event path from `migration_progress.go` to app-level overlay components. The confirmation modal is rendered as a floating interface window, matching other modal behavior in the app.
+
+## Data Locations
+
+QfPlus manages several local data groups:
+
+| Data | Owner |
+| --- | --- |
+| vfox home / download path | `config_vfox_home.go`, `config_download_path.go` |
+| Custom SDK registry | `sdk_custom_registry.go` |
+| Plugin description cache | `plugin_description_cache.go` |
+| System SDK cache | `system_cache.go` |
+| Windows path override metadata | `windows_override_metadata.go` |
+| Managed SDK entrypoints | `sdk_use.go`, `sdk_custom_use.go`, platform junction/symlink helpers |
+
+These files must stay separated. Registry code should not create links, parser code should not read files, and platform adapters should not own UI text.
+
+## Platform Boundaries
+
+Windows-specific behavior is isolated in `windows_*.go` files. Important responsibilities include hidden PowerShell execution, elevation, junctions, command shims, App Execution Alias compatibility, and PATH restore metadata.
+
+A shim is written only for an alias that resolves to a real file under `sdks/<name>` through the same probe matrix the generated script walks. A plugin name is not automatically a command — the `golang` plugin ships `go.exe`, `rust` ships `cargo.exe` and `rustc.exe` — so an alias with nothing behind it would leave a shim that can only print its own failure message. Aliases recorded on an earlier apply but no longer earned are deleted.
+
+Unix-specific behavior is isolated in `unix_*.go` files. It uses executable checks, symlink entrypoints, and shell profile path blocks.
+
+Cross-platform code should call the platform-level helper names and avoid direct OS branching unless there is no existing helper.
+
+## Testing Strategy
+
+- Parser behavior uses table-driven tests.
+- File-system code uses `t.TempDir()`.
+- Environment changes use `t.Setenv()`.
+- Platform-specific behavior stays in platform-specific files and tests.
+- Frontend behavior is verified through `npm --prefix frontend run build`.
+- Full backend verification is `go test ./...`.

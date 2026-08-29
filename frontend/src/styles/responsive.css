@@ -1,0 +1,117 @@
+/* === Narrow window: sidebar collapses to an icon rail === */
+@media (max-width: 900px) {
+  :root {
+    --sidebar-w: 68px;
+  }
+
+  .logo {
+    padding: 16px 0;
+    justify-content: center;
+  }
+
+  .logo h2 {
+    font-size: 0;
+  }
+
+  .logo h2::first-letter {
+    font-size: var(--md-typescale-title-large);
+  }
+
+  .nav-btn {
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .main-content {
+    padding: 24px 18px;
+  }
+
+  /* The notification dock cannot fit the 68px collapsed rail, so it pops out
+     to the right of the rail instead of being crushed. */
+  .sidebar-dock {
+    position: fixed;
+    left: calc(var(--sidebar-w) + 10px);
+    bottom: 12px;
+    width: 320px;
+    z-index: 80;
+  }
+
+  .sdk-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sdk-empty-panel {
+    min-height: 420px;
+    padding: 32px 20px;
+  }
+
+  .sdk-empty-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail-title-area {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .detail-title-area > div {
+    width: 100%;
+  }
+
+  .plugin-actions {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .set-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .terminal-header {
+    padding: 0 12px;
+  }
+
+  .terminal-body {
+    padding-inline: 12px;
+  }
+
+  .terminal-line {
+    grid-template-columns: 60px 12px minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .task-toast {
+    left: 16px;
+    right: 16px;
+    top: 16px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .task-toast .toast-title,
+  .task-toast .toast-subtitle {
+    white-space: normal;
+  }
+
+  .terminal-dock {
+    height: 200px;
+  }
+
+  .terminal-title {
+    gap: 6px;
+  }
+
+  .terminal-count {
+    min-width: 18px;
+  }
+}

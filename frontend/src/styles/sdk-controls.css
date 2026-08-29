@@ -1,0 +1,145 @@
+/* === Divider === */
+hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 24px 0;
+}
+
+/* === Expandable card header === */
+.card-header.expandable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-header.expandable:hover {
+  background: var(--hover);
+}
+
+/* === Counts and inline tags === */
+.version-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  min-width: 76px;
+  padding: 0 10px;
+  font-size: var(--md-typescale-label-medium);
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--bubble);
+  border-radius: var(--md-shape-full);
+  line-height: 1;
+}
+
+.system-tag,
+.vfox-tag,
+.current-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 8px;
+  border-radius: var(--md-shape-full);
+  font-size: var(--md-typescale-label-small);
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.system-tag {
+  color: var(--ink-2);
+  background: var(--bubble);
+}
+
+.vfox-tag {
+  color: var(--ink);
+  background: var(--active);
+}
+
+.current-tag {
+  color: var(--on-ink);
+  background: var(--ink);
+}
+
+/* === Install section === */
+.install-section {
+  border-top: 1px solid var(--hairline);
+  margin-top: 12px;
+}
+
+/* === Search === */
+.search-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-input {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+
+.search-input::placeholder {
+  color: var(--ink-3);
+}
+
+.search-input:hover {
+  border-color: var(--ink-3);
+}
+
+.search-input:focus {
+  border-color: var(--ink);
+  box-shadow: var(--focus-ring);
+}
+
+.search-results {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* === Buttons inside dense rows === */
+.btn.text.small {
+  height: 32px;
+  padding: 0 10px;
+  font-size: var(--md-typescale-label-medium);
+  line-height: 30px;
+}
+
+.btn.text.danger {
+  color: var(--danger);
+}
+
+.btn.text.danger:hover {
+  background: var(--md-error-container);
+}
+
+/* === Path readout === */
+.path-box {
+  background: var(--code-bg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--md-shape-small);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.path-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  word-break: break-all;
+  user-select: all;
+}

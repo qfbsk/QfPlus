@@ -1,0 +1,127 @@
+/* === Sidebar ===
+   Depth comes from the colour difference alone: no gradient, no shadow,
+   no border-right. */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--bg-side);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.logo {
+  padding: 20px 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo h2 {
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-title-large);
+  line-height: var(--md-typescale-title-large-line-height);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px;
+  gap: 2px;
+}
+
+.sidebar nav.bottom {
+  padding: 8px 8px 12px;
+}
+
+/* Foot group (notification dock + Settings/About) is pinned to the bottom. */
+.sidebar-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The env-action group (import / export / diagnostic) — icon-only, matching
+   the rest of the nav but without labels, separated by a hairline. */
+.sidebar-actions {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+.nav-btn.icon-only {
+  padding: 9px 10px;
+}
+
+/* Notification dock: download queue + task toast, stacked, docked in the
+   sidebar. It never floats — the sidebar is its home. */
+.sidebar-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-dock .download-queue {
+  max-height: 40vh;
+}
+
+.sidebar-dock .task-toast {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  z-index: auto;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--ink-2);
+  padding: 8px 10px;
+  text-align: left;
+  border-radius: var(--md-shape-small);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-title-small);
+  font-weight: 400;
+  line-height: var(--md-typescale-title-small-line-height);
+  letter-spacing: 0;
+  transition: background-color var(--t), color var(--t);
+  position: relative;
+}
+
+/* One stroke recipe for every nav glyph, so the markup carries path data only. */
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-btn:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.nav-btn.active {
+  background: var(--active);
+  color: var(--ink);
+  font-weight: 500;
+}

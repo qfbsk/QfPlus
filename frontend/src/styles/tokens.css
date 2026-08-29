@@ -1,0 +1,119 @@
+/* QfPlus design tokens — ChatGPT-style minimal black-on-white, light theme only.
+   The --md-* names are kept as opaque slots so component stylesheets stay
+   readable; only what they point at has changed. */
+:root {
+  /* Neutral palette */
+  --bg: #FFFFFF;
+  --bg-side: #F9F9F9;
+  --bubble: #F4F4F4;
+  --hover: #ECECF1;
+  --active: #E3E3E3;
+  --code-bg: #F7F7F8;
+  --hairline: #ECECF1;
+  --border: #E3E3E3;
+  --border-strong: #D9D9D9;
+  --ink: #0D0D0D;
+  --ink-2: #5D5D5D;
+  --ink-3: #8E8EA0;
+  --on-ink: #FFFFFF;
+  --link: #1A7FBB;
+  --danger: #B3261E;
+
+  /* Primary — the single "ink" accent used by filled controls */
+  --md-primary: var(--ink);
+  --md-on-primary: var(--on-ink);
+  --md-primary-container: var(--bubble);
+  --md-on-primary-container: var(--ink);
+
+  /* Secondary and tertiary collapse into the same grey ramp */
+  --md-secondary: var(--ink-2);
+  --md-on-secondary: var(--on-ink);
+  --md-secondary-container: var(--hover);
+  --md-on-secondary-container: var(--ink);
+
+  --md-tertiary: var(--ink-2);
+  --md-on-tertiary: var(--on-ink);
+  --md-tertiary-container: var(--bubble);
+  --md-on-tertiary-container: var(--ink);
+
+  /* Error is the only remaining hue, and only for destructive affordances */
+  --md-error: var(--danger);
+  --md-on-error: var(--on-ink);
+  --md-error-container: #F7E7E5;
+  --md-on-error-container: var(--danger);
+
+  /* Surface */
+  --md-surface: var(--bg);
+  --md-on-surface: var(--ink);
+  --md-on-surface-variant: var(--ink-2);
+  --md-outline: var(--border-strong);
+  --md-outline-variant: var(--hairline);
+
+  /* Surface container hierarchy — five greys, no tints */
+  --md-surface-container-lowest: #FFFFFF;
+  --md-surface-container-low: var(--bg-side);
+  --md-surface-container: var(--bubble);
+  --md-surface-container-high: var(--hover);
+  --md-surface-container-highest: var(--active);
+
+  /* Inverse */
+  --md-inverse-surface: var(--ink);
+  --md-inverse-on-surface: var(--on-ink);
+  --md-inverse-primary: var(--on-ink);
+
+  /* Shape */
+  --md-shape-extra-small: 4px;
+  --md-shape-small: 8px;
+  --md-shape-medium: 12px;
+  --md-shape-large: 16px;
+  --md-shape-extra-large: 28px;
+  --md-shape-full: 9999px;
+  --radius-card: 12px;
+  --radius-pill: 26px;
+
+  /* Depth is carried by hairlines and whitespace, never by shadows */
+  --md-elevation-0: none;
+  --md-elevation-1: none;
+  --md-elevation-2: none;
+  --md-elevation-3: none;
+  --md-elevation-4: none;
+  --md-elevation-5: none;
+  --panel-border: var(--border);
+  --focus-ring: 0 0 0 3px rgba(13, 13, 13, 0.14);
+
+  /* Layout */
+  --sidebar-w: 260px;
+  --content-max: 768px;
+  --t: 160ms ease;
+
+  /* Typography — system stack, no webfont download */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto",
+    "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas,
+    "Liberation Mono", Menlo, monospace;
+
+  --md-typescale-display-large: 28px;
+  --md-typescale-display-line-height: 36px;
+  --md-typescale-headline-large: 22px;
+  --md-typescale-headline-line-height: 28px;
+  --md-typescale-headline-medium: 18px;
+  --md-typescale-headline-medium-line-height: 26px;
+  --md-typescale-title-large: 18px;
+  --md-typescale-title-large-line-height: 26px;
+  --md-typescale-title-medium: 16px;
+  --md-typescale-title-medium-line-height: 24px;
+  --md-typescale-title-small: 14px;
+  --md-typescale-title-small-line-height: 20px;
+  --md-typescale-body-large: 16px;
+  --md-typescale-body-large-line-height: 26px;
+  --md-typescale-body-medium: 14px;
+  --md-typescale-body-medium-line-height: 22px;
+  --md-typescale-body-small: 12px;
+  --md-typescale-body-small-line-height: 18px;
+  --md-typescale-label-large: 14px;
+  --md-typescale-label-large-line-height: 20px;
+  --md-typescale-label-medium: 12px;
+  --md-typescale-label-medium-line-height: 16px;
+  --md-typescale-label-small: 11px;
+  --md-typescale-label-small-line-height: 16px;
+}

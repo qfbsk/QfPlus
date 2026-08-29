@@ -1,0 +1,58 @@
+# Build output
+build/bin/
+*.syso
+
+# Compiled binaries
+*.exe
+
+# Core binaries (vfox engine + mihomo proxy), provided by the builder
+core/
+
+# Dependencies
+node_modules/
+frontend/dist/*
+!frontend/dist/.gitkeep
+frontend/package.json.md5
+
+# Wails generated bindings. Keep them in the repo so standalone
+# frontend type-check/build works on a fresh clone.
+!frontend/wailsjs/
+!frontend/wailsjs/**
+
+# IDE
+.idea/
+.vscode/
+.claude/
+.gemini/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Screenshots
+snapshot/
+
+# Temp / Debug
+*.debug.txt
+.gocache/
+scratch/
+debug_test.go
+
+# Release builds (large binaries)
+release/
+
+# Downloaded archives
+*.zip
+
+# Generated nfpm config
+nfpm.yaml
+
+# Wails auto-generated NSIS include
+build/windows/installer/wails_tools.nsh
+
+# Vite timestamp temp files
+vite.config.ts.timestamp-*.mjs
+
+# Stale dist backups
+.dist_bak/
+.dist_bak_*/

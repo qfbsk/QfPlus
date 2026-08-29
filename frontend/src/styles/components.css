@@ -1,0 +1,285 @@
+/* Shared UI primitives used across more than one view.
+   Layout vocabulary follows the ChatGPT minimal spec: hairline-separated rows,
+   no shadows, no gradients, state carried by weight and shape rather than hue. */
+
+/* === Settings group: heading + hairline-separated rows === */
+.set-group {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 32px;
+}
+
+.set-group > h2 {
+  margin: 0 0 4px;
+  padding: 0;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-label-large);
+  line-height: var(--md-typescale-label-large-line-height);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.set-group > h2 + .set-list {
+  margin-top: 8px;
+}
+
+.set-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--hairline);
+  min-width: 0;
+}
+
+.set-row:first-child {
+  border-top: none;
+}
+
+.set-row.stack {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.set-row .left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.set-row .label {
+  color: var(--ink);
+  font-size: var(--md-typescale-title-medium);
+  line-height: var(--md-typescale-title-medium-line-height);
+  font-weight: 400;
+}
+
+.set-row .desc {
+  color: var(--ink-3);
+  font-size: var(--md-typescale-body-medium);
+  line-height: var(--md-typescale-body-medium-line-height);
+}
+
+.set-row .right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* === Segmented control (radio group) === */
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bubble);
+  border-radius: 10px;
+}
+
+.seg button {
+  height: 30px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--font-sans);
+  font-size: var(--md-typescale-body-medium);
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--t), color var(--t);
+}
+
+.seg button:hover:not([aria-checked='true']) {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.seg button[aria-checked='true'] {
+  background: var(--active);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* === Switch (44 × 26, ink when on) === */
+.switch {
+  position: relative;
+  display: inline-flex;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--md-shape-full);
+  background: var(--border-strong);
+  transition: background-color var(--t);
+}
+
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--on-ink);
+  transition: transform var(--t);
+}
+
+.switch input:checked + .slider {
+  background: var(--ink);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+.switch input:focus-visible + .slider {
+  box-shadow: var(--focus-ring);
+}
+
+.switch input:disabled + .slider {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.switch.small {
+  width: 36px;
+  height: 20px;
+}
+
+.switch.small .slider {
+  width: 36px;
+  height: 20px;
+}
+
+.switch.small .slider::before {
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+}
+
+.switch.small input:checked + .slider::before {
+  transform: translateX(16px);
+}
+
+/* === Status pill + dot === */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--md-shape-full);
+  background: var(--bubble);
+  color: var(--ink-2);
+  font-size: var(--md-typescale-label-medium);
+  line-height: var(--md-typescale-label-medium-line-height);
+  font-weight: 500;
+}
+
+.status-pill.latest,
+.status-pill.on,
+.status-pill.update {
+  background: var(--active);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.status-pill.off {
+  background: transparent;
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.status-pill.error {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* === Small labels and tags === */
+.block-label {
+  color: var(--ink-3);
+  font-size: var(--md-typescale-label-medium);
+  line-height: var(--md-typescale-label-medium-line-height);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: var(--md-shape-full);
+  background: var(--bubble);
+  color: var(--ink-2);
+  font-size: var(--md-typescale-label-small);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.tag.current {
+  background: var(--ink);
+  color: var(--on-ink);
+  font-weight: 600;
+}
+
+.tag.local,
+.tag.bundled,
+.tag.working {
+  background: var(--active);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tag.installed-chip {
+  min-width: 76px;
+  height: 32px;
+  justify-content: center;
+  background: var(--active);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* === Spinner sizes === */
+.small-spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}

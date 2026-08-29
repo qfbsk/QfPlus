@@ -1,0 +1,26 @@
+name: "qfplus"
+arch: "${NFPM_ARCH}"
+platform: "linux"
+version: "1.0.0"
+section: "default"
+priority: "extra"
+maintainer: "清枫不识客"
+description: "Cross-platform SDK version manager GUI built on the vfox engine, with a bundled Clash (mihomo) proxy core"
+vendor: "QfPlus"
+license: "Apache-2.0"
+contents:
+  - src: ./build/bin/QfPlus-linux-${NFPM_ARCH}
+    dst: /usr/bin/qfplus
+    type: file
+    file_info:
+      mode: 0755
+  - src: ./core/linux/${NFPM_CORE_ARCH}/vfox
+    dst: /usr/lib/qfplus/core/linux/${NFPM_CORE_ARCH}/vfox
+    type: file
+    file_info:
+      mode: 0755
+  - src: ./core/linux/${NFPM_CORE_ARCH}/mihomo
+    dst: /usr/lib/qfplus/core/linux/${NFPM_CORE_ARCH}/mihomo
+    type: file
+    file_info:
+      mode: 0755
