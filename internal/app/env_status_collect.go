@@ -47,14 +47,17 @@ func (a *App) collectEnvironmentStatus() (*model.EnvironmentStatusReport, error)
 
 	addedPlugins, _ := a.getAddedPlugins()
 
-	// Deliberate: answer "can my terminal run it?" with the real process
-	// environment, not the stripped scan environment used for detection.
-	env := os.Environ()
+	// Probe with the LIVE registry PATH, not the process environment frozen at
+	// startup. QfPlus writes new shims into the registry PATH at runtime, so a
+	// manual refresh must re-scan that live PATH to reflect freshly added SDKs
+	// without forcing the user to restart the app. Other environment variables
+	// are preserved so subprocess probes (where / go version) still work.
+	probeEnv := livePathEnv(os.Environ(), userPath, machinePath)
 
 	for name, source := range pluginNames {
 		isCurrent := selections[name] != ""
 		for _, alias := range pluginCommandAliases(name) {
-			item := a.probeCommand(name, alias, source, isCurrent, env, userPath, machinePath, addedPlugins)
+			item := a.probeCommand(name, alias, source, isCurrent, probeEnv, userPath, machinePath, addedPlugins)
 			report.Items = append(report.Items, item)
 		}
 	}
@@ -122,21 +125,27 @@ func (a *App) probeCommand(pluginName, alias, source string, isCurrent bool, env
 		return item
 	}
 
-	version := a.tryGetVersionWithEnv(exePath, versionArgsFor(alias), env)
-	if !isUsableSystemVersion(version) {
-		facts := sdkCommandFacts{
-			resolved:      true,
-			managedBy:     a.shimOwningPlugin(alias, addedPlugins),
-			onUserPath:    item.OnUserPath,
-			onMachinePath: item.OnMachinePath,
-			broken:        true,
+	// Some aliases (e.g. gofmt) ship with a toolchain but expose no version flag.
+	// For those we still confirm the executable resolves, then skip the version
+	// probe and report the command as working without a version string.
+	verArgs := versionArgsFor(alias)
+	if len(verArgs) > 0 {
+		version := a.tryGetVersionWithEnv(exePath, verArgs, env)
+		if !isUsableSystemVersion(version) {
+			facts := sdkCommandFacts{
+				resolved:      true,
+				managedBy:     a.shimOwningPlugin(alias, addedPlugins),
+				onUserPath:    item.OnUserPath,
+				onMachinePath: item.OnMachinePath,
+				broken:        true,
+			}
+			item.State = classifyState(facts)
+			item.Notes = append(item.Notes, "command resolves on PATH but its version probe returned no usable output")
+			return item
 		}
-		item.State = classifyState(facts)
-		item.Notes = append(item.Notes, "command resolves on PATH but its version probe returned no usable output")
-		return item
+		item.Version = version
 	}
 
-	item.Version = version
 	managedBy := a.shimOwningPlugin(alias, addedPlugins)
 	facts := sdkCommandFacts{
 		resolved:      true,
@@ -202,4 +211,45 @@ func (a *App) vfoxShimDirOnPath(userPath, machinePath string) bool {
 		return false
 	}
 	return pathContainsDir(userPath, shimDir) || pathContainsDir(machinePath, shimDir)
+}
+
+// livePathEnv returns a copy of env with the PATH entry replaced by the live
+// user + machine PATH a freshly opened console would see. QfPlus adds SDK
+// shims to the registry PATH while running, so reusing the process environment
+// (captured at launch) would miss them until the app restarts. Callers that
+// probe the environment for command resolution must use this live PATH, which
+// is what makes a manual refresh reflect newly added SDKs immediately.
+func livePathEnv(env []string, userPath, machinePath string) []string {
+	live := combinePathScopes(userPath, machinePath)
+	if live == "" {
+		return env
+	}
+	const pathKey = "PATH="
+	out := make([]string, 0, len(env)+1)
+	replaced := false
+	for _, kv := range env {
+		if len(kv) >= len(pathKey) && strings.EqualFold(kv[:len(pathKey)], pathKey) {
+			out = append(out, pathKey+live)
+			replaced = true
+			continue
+		}
+		out = append(out, kv)
+	}
+	if !replaced {
+		out = append(out, pathKey+live)
+	}
+	return out
+}
+
+// combinePathScopes joins the user and machine PATH scopes the way a new
+// console resolves them. Empty scopes are skipped.
+func combinePathScopes(userPath, machinePath string) string {
+	parts := make([]string, 0, 2)
+	if strings.TrimSpace(userPath) != "" {
+		parts = append(parts, userPath)
+	}
+	if strings.TrimSpace(machinePath) != "" {
+		parts = append(parts, machinePath)
+	}
+	return strings.Join(parts, string(os.PathListSeparator))
 }

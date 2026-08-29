@@ -3,11 +3,19 @@ package app
 import "strings"
 
 // pluginCommandAliases returns every command a plugin is expected to provide,
-// cross-platform. The plugin name itself is always the first entry. This is the
-// single source of truth shared by both Windows shim generation and the
-// environment status probe, so the two can never drift apart.
+// cross-platform. The primary executable comes from systemSDKDefs when the
+// plugin is listed there, otherwise the plugin name itself is used. This keeps
+// shim generation and the environment status probe aligned, especially for
+// plugins whose package name differs from the real command (e.g. golang -> go).
 func pluginCommandAliases(pluginName string) []string {
-	aliases := []string{pluginName}
+	primary := pluginName
+	for _, def := range systemSDKDefs {
+		if def.Name == pluginName {
+			primary = def.Exe
+			break
+		}
+	}
+	aliases := []string{primary}
 	switch strings.ToLower(pluginName) {
 	case "python":
 		aliases = append(aliases, "python3", "pip", "pip3")
@@ -49,10 +57,17 @@ func uniqueStrings(values []string) []string {
 }
 
 // versionArgsFor returns the version-probe arguments for a command alias.
+// An empty slice means the command has no reliable version flag (e.g. gofmt);
+// callers should skip the version probe but still treat the command as resolvable.
 func versionArgsFor(alias string) []string {
 	switch strings.ToLower(alias) {
 	case "java", "javac", "jar", "jshell", "jlink", "jpackage", "keytool":
 		return []string{"-version"}
+	case "go":
+		return []string{"version"}
+	case "gofmt":
+		// gofmt has no version flag; its version is the same as go.
+		return nil
 	default:
 		return []string{"--version"}
 	}

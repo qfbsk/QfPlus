@@ -37,7 +37,7 @@ func (a *App) buildDiagnosticScript(report *EnvironmentStatusReport) string {
 	writeLine("echo VfoxInPath: %v", report.VfoxInPath)
 	writeLine("echo.")
 	writeLine("echo Current terminal PATH:")
-	writeLine("echo %PATH%")
+	writeLine("echo %s", "%PATH%")
 	writeLine("echo.")
 	writeLine("echo Resolved SDK commands:")
 	for _, item := range report.Items {
