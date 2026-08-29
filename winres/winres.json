@@ -1,17 +1,17 @@
 {
   "RT_GROUP_ICON": {
-    "3": {
-      "1033": "../build/windows/icon.ico"
+    "#3": {
+      "0409": "../build/windows/icon.ico"
     }
   },
   "RT_MANIFEST": {
-    "1": {
-      "1033": "../build/windows/qfplus.manifest"
+    "#1": {
+      "0409": "../build/windows/qfplus.manifest"
     }
   },
   "RT_VERSION": {
-    "1": {
-      "1033": {
+    "#1": {
+      "0409": {
         "file-version": "1.0.0.0",
         "product-version": "1.0.0.0",
         "file-description": "QfPlus",
