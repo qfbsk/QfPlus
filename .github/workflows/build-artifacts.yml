@@ -1,0 +1,185 @@
+name: Build non-Windows artifacts
+
+# Manual only: no push/tag trigger, and this workflow never creates a GitHub
+# Release. Each run stops at downloadable artifacts.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Must equal the github.com/wailsapp/wails/v2 version in go.mod: the CLI
+  # generates the bindings the pinned runtime loads. It also has to install
+  # under the Go version go.mod asks setup-go for, which is why this is 2.12.0
+  # and not 2.15.0 (whose module requires go >= 1.25).
+  WAILS_CLI: v2.12.0
+  NFPM_VERSION: 2.47.0
+
+jobs:
+  build:
+    name: ${{ matrix.id }}
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: linux-amd64
+            runs_on: ubuntu-24.04
+            platform: linux/amd64
+            core_dir: linux/x86_64
+            # Wails v2 needs the 4.1 WebKitGTK on Ubuntu 24.04, which only
+            # exists behind this build tag.
+            build_tags: webkit2_41
+            vfox_url: https://github.com/version-fox/vfox/releases/download/v1.0.11/vfox_1.0.11_linux_x86_64.tar.gz
+            mihomo_url: https://github.com/MetaCubeX/mihomo/releases/download/v1.18.8/mihomo-linux-amd64-v1.18.8.gz
+            nfpm_arch: amd64
+            nfpm_core_arch: x86_64
+          - id: darwin-arm64
+            runs_on: macos-14
+            platform: darwin/arm64
+            core_dir: macos/arm64
+            build_tags: ''
+            vfox_url: https://github.com/version-fox/vfox/releases/download/v1.0.11/vfox_1.0.11_macos_aarch64.tar.gz
+            mihomo_url: https://github.com/MetaCubeX/mihomo/releases/download/v1.18.8/mihomo-darwin-arm64-v1.18.8.gz
+            nfpm_arch: ''
+            nfpm_core_arch: ''
+          - id: darwin-amd64
+            runs_on: macos-14
+            platform: darwin/amd64
+            core_dir: macos/amd64
+            build_tags: ''
+            vfox_url: https://github.com/version-fox/vfox/releases/download/v1.0.11/vfox_1.0.11_macos_x86_64.tar.gz
+            mihomo_url: https://github.com/MetaCubeX/mihomo/releases/download/v1.18.8/mihomo-darwin-amd64-v1.18.8.gz
+            nfpm_arch: ''
+            nfpm_core_arch: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install WebKitGTK (Linux)
+        if: matrix.nfpm_arch != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_CLI }}
+
+      - name: Install nfpm (Linux)
+        if: matrix.nfpm_arch != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tools
+          curl -fL --retry 3 \
+            "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz -C .tools nfpm
+          ls -la .tools
+
+      - name: Download vfox and mihomo cores
+        shell: bash
+        run: |
+          set -euo pipefail
+          core_target="core/${{ matrix.core_dir }}"
+          mkdir -p "$core_target"
+
+          tmp="$(mktemp -d)"
+          curl -fL --retry 3 "${{ matrix.vfox_url }}" -o "$tmp/vfox.tar.gz"
+          tar -xzf "$tmp/vfox.tar.gz" -C "$tmp"
+          vfox_bin="$(find "$tmp" -type f -name vfox | head -n 1)"
+          test -n "$vfox_bin"
+          install -m 0755 "$vfox_bin" "$core_target/vfox"
+
+          curl -fL --retry 3 "${{ matrix.mihomo_url }}" -o "$tmp/mihomo.gz"
+          gunzip -c "$tmp/mihomo.gz" > "$core_target/mihomo"
+          chmod 0755 "$core_target/mihomo"
+
+          # Both cores are multi-megabyte binaries, so a size gate catches a bad
+          # archive layout or a truncated download without depending on flags.
+          for binary in vfox mihomo; do
+            size="$(wc -c < "$core_target/$binary")"
+            echo "$binary: $size bytes"
+            test "$size" -gt 1000000
+          done
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n '${{ matrix.build_tags }}' ]; then
+            wails build -platform '${{ matrix.platform }}' -tags '${{ matrix.build_tags }}' -clean
+          else
+            wails build -platform '${{ matrix.platform }}' -clean
+          fi
+          ls -la build/bin
+
+      - name: Package (Linux)
+        if: matrix.nfpm_arch != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          mv build/bin/QfPlus "build/bin/QfPlus-linux-${{ matrix.nfpm_arch }}"
+
+          NFPM_ARCH='${{ matrix.nfpm_arch }}' \
+          NFPM_CORE_ARCH='${{ matrix.nfpm_core_arch }}' \
+          envsubst '$NFPM_ARCH $NFPM_CORE_ARCH' < nfpm.yaml.tmpl > nfpm.yaml
+          ./.tools/nfpm package -p deb -f nfpm.yaml -t "dist/QfPlus-${{ matrix.id }}-installer.deb"
+
+          stage="dist/portable/QfPlus"
+          mkdir -p "$stage/core/${{ matrix.core_dir }}"
+          cp "build/bin/QfPlus-linux-${{ matrix.nfpm_arch }}" "$stage/QfPlus"
+          cp "core/${{ matrix.core_dir }}/vfox" "core/${{ matrix.core_dir }}/mihomo" "$stage/core/${{ matrix.core_dir }}/"
+          tar -czf "dist/QfPlus-${{ matrix.id }}-portable.tar.gz" -C dist/portable QfPlus
+
+      - name: Package (macOS)
+        if: matrix.nfpm_arch == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          app="build/bin/QfPlus.app"
+          test -d "$app"
+
+          # getCoreDir() checks <exeDir>/../Resources/core, so the cores belong
+          # inside the bundle for a native .app layout.
+          resources="$app/Contents/Resources/core/${{ matrix.core_dir }}"
+          mkdir -p "$resources"
+          cp "core/${{ matrix.core_dir }}/vfox" "core/${{ matrix.core_dir }}/mihomo" "$resources/"
+          chmod 0755 "$resources/vfox" "$resources/mihomo"
+          xattr -dr com.apple.quarantine "$app" 2>/dev/null || true
+
+          ditto -c -k --keepParent "$app" "dist/QfPlus-${{ matrix.id }}-portable.zip"
+
+          dmg_stage="dist/dmg"
+          mkdir -p "$dmg_stage"
+          cp -R "$app" "$dmg_stage/"
+          ln -s /Applications "$dmg_stage/Applications"
+          hdiutil create -volname QfPlus -srcfolder "$dmg_stage" -ov -format UDZO \
+            "dist/QfPlus-${{ matrix.id }}-installer.dmg"
+
+      - name: List artifacts
+        shell: bash
+        run: ls -la dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: QfPlus-${{ matrix.id }}
+          path: dist/QfPlus-*
+          if-no-files-found: error
+          retention-days: 30
