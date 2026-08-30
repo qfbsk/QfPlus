@@ -42,6 +42,8 @@ export function GetEnvironmentInventory():Promise<model.EnvironmentInventory>;
 
 export function GetEnvironmentStatus():Promise<model.EnvironmentStatusReport>;
 
+export function GetGitHubSourceSettings():Promise<model.GitHubSourceSettings>;
+
 export function GetInstalledSdks():Promise<Array<model.SdkInfo>>;
 
 export function GetNonVfoxSdks():Promise<Record<string, Array<model.SdkInfo>>>;
@@ -99,6 +101,8 @@ export function RestoreSystemPath(arg1:string):Promise<void>;
 export function RunVfoxCommand(arg1:Array<string>):Promise<string>;
 
 export function RunVfoxWithProgress(arg1:Array<string>):Promise<void>;
+
+export function SaveGitHubSourceSettings(arg1:model.GitHubSourceSettings):Promise<model.GitHubSourceSettings>;
 
 export function ScanSystemSdks():Promise<void>;
 

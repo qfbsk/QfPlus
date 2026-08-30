@@ -70,6 +70,8 @@ provide('taskToast', {
 const envStatus = useEnvironmentStatus();
 
 const handleActionDiagnostic = async () => {
+  // Expand the terminal so the diagnostic output is visible immediately.
+  showTerminal.value = true;
   try {
     await envStatus.openDiagnostic();
   } catch (err) {
@@ -145,10 +147,10 @@ const clearSdkSidebarAction = (id: number) => {
 
       <TerminalDock
         ref="terminalDock"
-        :visible="showTerminal"
+        :expanded="showTerminal"
         :logs="terminalLogs"
         @clear="clearTerminalLogs"
-        @hide="showTerminal = false"
+        @toggle="showTerminal = !showTerminal"
       />
     </div>
 

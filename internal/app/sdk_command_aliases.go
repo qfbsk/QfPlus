@@ -61,8 +61,12 @@ func uniqueStrings(values []string) []string {
 // callers should skip the version probe but still treat the command as resolvable.
 func versionArgsFor(alias string) []string {
 	switch strings.ToLower(alias) {
-	case "java", "javac", "jar", "jshell", "jlink", "jpackage", "keytool":
+	case "java", "javac", "jshell", "keytool":
+		// Standard JDK tools accept -version.
 		return []string{"-version"}
+	case "jar", "jlink", "jpackage":
+		// These JDK tools reject -version and only accept --version.
+		return []string{"--version"}
 	case "go":
 		return []string{"version"}
 	case "gofmt":

@@ -4,11 +4,11 @@ import { t } from '../../i18n';
 import type { TerminalLogEntry } from '../../composables/useTaskTerminal';
 
 defineProps<{
-  visible: boolean;
+  expanded: boolean;
   logs: TerminalLogEntry[];
 }>();
 
-const emit = defineEmits(['clear', 'hide']);
+const emit = defineEmits(['clear', 'toggle']);
 const terminalBody = ref<HTMLElement | null>(null);
 
 const scrollToBottom = () => {
@@ -22,8 +22,30 @@ defineExpose({
 </script>
 
 <template>
-  <Transition name="terminal-dock-slide">
-    <section v-if="visible" class="terminal-dock" :aria-label="t('terminal.aria')">
+  <section class="terminal-dock" :class="{ collapsed: !expanded }" :aria-label="t('terminal.aria')">
+    <!-- Collapsed: a single thin status line, like a browser status bar -->
+    <button
+      v-if="!expanded"
+      type="button"
+      class="terminal-collapsed-bar"
+      :aria-label="t('terminal.expand')"
+      :title="t('terminal.expand')"
+      @click="emit('toggle')"
+    >
+      <span class="terminal-collapsed-label">
+        <span class="material-symbols-outlined">terminal</span>
+        {{ t('terminal.title') }}
+        <span v-if="logs.length" class="terminal-count">{{ logs.length }}</span>
+      </span>
+      <span class="terminal-chevron-wrap" aria-hidden="true">
+        <svg class="terminal-chevron" viewBox="0 0 24 24">
+          <path d="M7 10 L12 15 L17 10" />
+        </svg>
+      </span>
+    </button>
+
+    <!-- Expanded: the full terminal panel -->
+    <template v-else>
       <div class="terminal-header">
         <div class="terminal-title">
           <span class="material-symbols-outlined">terminal</span>
@@ -34,8 +56,15 @@ defineExpose({
           <button class="terminal-icon-btn" :title="t('terminal.clear')" @click="emit('clear')">
             <span class="material-symbols-outlined">delete_sweep</span>
           </button>
-          <button class="terminal-icon-btn" :title="t('terminal.hide')" @click="emit('hide')">
-            <span class="material-symbols-outlined">keyboard_arrow_down</span>
+          <button
+            class="terminal-icon-btn terminal-toggle"
+            :title="t('terminal.collapse')"
+            :aria-label="t('terminal.collapse')"
+            @click="emit('toggle')"
+          >
+            <svg class="terminal-chevron up" viewBox="0 0 24 24">
+              <path d="M7 10 L12 15 L17 10" />
+            </svg>
           </button>
         </div>
       </div>
@@ -47,6 +76,6 @@ defineExpose({
           <span class="terminal-text">{{ entry.text }}</span>
         </div>
       </div>
-    </section>
-  </Transition>
+    </template>
+  </section>
 </template>

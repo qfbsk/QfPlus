@@ -148,7 +148,7 @@ type atomEntry struct {
 // fetchCoreReleases reads the public Atom feed instead of the REST API: the
 // API is rate-limited per IP and the shared proxy exit IP is often exhausted.
 func (a *App) fetchCoreReleases() ([]CoreRelease, error) {
-	req, err := http.NewRequest("GET", coreAtomURL, nil)
+	req, err := http.NewRequest("GET", a.applyGitHubSource(coreAtomURL), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,14 @@ func (a *App) fetchCoreReleases() ([]CoreRelease, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseCoreAtomFeed(body)
+	releases, err := parseCoreAtomFeed(body)
+	if err != nil {
+		return nil, err
+	}
+	for i := range releases {
+		releases[i].URL = a.applyGitHubSource(releases[i].URL)
+	}
+	return releases, nil
 }
 
 // parseCoreAtomFeed converts the GitHub releases Atom XML into release DTOs,
@@ -336,7 +343,7 @@ func (a *App) downloadCoreArtifact(version string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	downloadURL := coreDownloadBase + "v" + version + "/" + assetName
+	downloadURL := a.applyGitHubSource(coreDownloadBase + "v" + version + "/" + assetName)
 
 	workDir := a.coreUpdateDir()
 	if err := os.MkdirAll(workDir, 0755); err != nil {

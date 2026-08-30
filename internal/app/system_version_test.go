@@ -15,6 +15,9 @@ func TestExtractVersionAcceptsExecutablePaths(t *testing.T) {
 		{name: "python exe path", raw: "Python 3.12.1\r\n", exe: filepath.Join("tmp", "Python312", "python.exe"), want: "3.12.1"},
 		{name: "node cmd path", raw: "v24.15.0\n", exe: filepath.Join("tmp", "tools", "node.cmd"), want: "24.15.0"},
 		{name: "unix go path", raw: "go version go1.26.3 windows/amd64\n", exe: filepath.Join("/usr", "local", "go", "bin", "go"), want: "1.26.3"},
+		{name: "jar --version", raw: "jar 25.0.3\n", exe: filepath.Join("C:", "jdk", "bin", "jar.exe"), want: "25.0.3"},
+		{name: "jlink --version", raw: "25.0.3\n", exe: filepath.Join("C:", "jdk", "bin", "jlink.exe"), want: "25.0.3"},
+		{name: "jpackage --version", raw: "25.0.3\n", exe: filepath.Join("C:", "jdk", "bin", "jpackage.exe"), want: "25.0.3"},
 	}
 
 	for _, tt := range tests {

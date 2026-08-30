@@ -71,6 +71,9 @@ func extractVersion(raw string, exe string) string {
 			return quoted
 		}
 		return clean
+	case "jar":
+		// jar --version 输出: jar 25.0.3
+		return strings.TrimPrefix(clean, "jar ")
 	case "go":
 		if part := versionField(clean, 2); part != "" {
 			return strings.TrimPrefix(part, "go")

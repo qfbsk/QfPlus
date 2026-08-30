@@ -20,7 +20,8 @@ export const zhShell: Record<keyof typeof enShell, string> = {
   // Terminal
   'terminal.title': '终端',
   'terminal.clear': '清空终端',
-  'terminal.hide': '隐藏终端',
+  'terminal.expand': '展开终端',
+  'terminal.collapse': '收起终端',
   'terminal.empty': '暂无终端输出。',
   'terminal.aria': '终端输出',
 

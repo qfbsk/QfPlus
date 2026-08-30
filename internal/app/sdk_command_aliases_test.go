@@ -40,6 +40,11 @@ func TestVersionArgsForSpecialCases(t *testing.T) {
 		{"node", []string{"--version"}},
 		{"java", []string{"-version"}},
 		{"javac", []string{"-version"}},
+		{"jshell", []string{"-version"}},
+		{"keytool", []string{"-version"}},
+		{"jar", []string{"--version"}},
+		{"jlink", []string{"--version"}},
+		{"jpackage", []string{"--version"}},
 	}
 
 	for _, c := range cases {

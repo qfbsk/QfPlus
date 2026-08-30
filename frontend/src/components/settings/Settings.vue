@@ -5,6 +5,7 @@ import { useDownloadPathSettings } from '../../composables/useDownloadPathSettin
 import AppearanceSettings from './AppearanceSettings.vue';
 import CoreSettings from './CoreSettings.vue';
 import DownloadPathSettings from './DownloadPathSettings.vue';
+import GitHubSourceSettings from './GitHubSourceSettings.vue';
 import MigrationPlanModal from './MigrationPlanModal.vue';
 import ProxySettings from './ProxySettings.vue';
 
@@ -31,6 +32,7 @@ const downloadPathSettings = useDownloadPathSettings((notice) => {
 
     <AppearanceSettings v-model:show-terminal="terminalVisible" />
     <ProxySettings @notify="emit('notify', $event)" />
+    <GitHubSourceSettings @notify="emit('notify', $event)" />
     <DownloadPathSettings
       v-model:download-path-input="downloadPathSettings.downloadPathInput.value"
       :download-path-info="downloadPathSettings.downloadPathInfo.value"

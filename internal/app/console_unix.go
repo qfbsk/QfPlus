@@ -2,13 +2,10 @@
 
 package app
 
-// openEnvironmentDiagnostic is unsupported off Windows.
+// openEnvironmentDiagnostic streams the read-only diagnostic report into the
+// in-app terminal. On non-Windows platforms there was never a visible console
+// window, but the output now goes through the same terminal channel as vfox
+// tasks so the UX is consistent.
 func (a *App) openEnvironmentDiagnostic() error {
-	return errNoVisibleConsole
-}
-
-// openVisibleConsole is unsupported off Windows. Callers should surface
-// errNoVisibleConsole to the user and fall back to the in-app report.
-func openVisibleConsole(script string) error {
-	return errNoVisibleConsole
+	return a.streamDiagnosticToTerminal()
 }

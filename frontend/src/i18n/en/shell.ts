@@ -20,7 +20,8 @@ export const enShell = {
   // Terminal
   'terminal.title': 'Terminal',
   'terminal.clear': 'Clear terminal',
-  'terminal.hide': 'Hide terminal',
+  'terminal.expand': 'Expand terminal',
+  'terminal.collapse': 'Collapse terminal',
   'terminal.empty': 'No terminal output yet.',
   'terminal.aria': 'Terminal output',
 

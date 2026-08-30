@@ -35,6 +35,13 @@ func (a *App) getCleanedEnvForVfox() []string {
 		env = upsertEnv(env, "no_proxy", "localhost,127.0.0.1,::1")
 	}
 
+	// Pass the active GitHub mirror into child processes so that vfox plugins
+	// honoring a mirror environment variable can use it alongside the proxy.
+	if sourceURL := a.githubSourceEnvValue(); sourceURL != "" {
+		env = upsertEnv(env, "GITHUB_MIRROR", sourceURL)
+		env = upsertEnv(env, "VFOX_GITHUB_MIRROR", sourceURL)
+	}
+
 	return env
 }
 

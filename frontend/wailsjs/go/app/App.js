@@ -82,6 +82,10 @@ export function GetEnvironmentStatus() {
   return window['go']['app']['App']['GetEnvironmentStatus']();
 }
 
+export function GetGitHubSourceSettings() {
+  return window['go']['app']['App']['GetGitHubSourceSettings']();
+}
+
 export function GetInstalledSdks() {
   return window['go']['app']['App']['GetInstalledSdks']();
 }
@@ -196,6 +200,10 @@ export function RunVfoxCommand(arg1) {
 
 export function RunVfoxWithProgress(arg1) {
   return window['go']['app']['App']['RunVfoxWithProgress'](arg1);
+}
+
+export function SaveGitHubSourceSettings(arg1) {
+  return window['go']['app']['App']['SaveGitHubSourceSettings'](arg1);
 }
 
 export function ScanSystemSdks() {
